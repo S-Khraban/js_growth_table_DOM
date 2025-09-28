@@ -7,6 +7,8 @@
     return;
   }
 
+  const container = table.tBodies[0] || table;
+
   const btnAddRow = document.querySelector('.append-row');
   const btnRemRow = document.querySelector('.remove-row');
   const btnAddCol = document.querySelector('.append-column');
@@ -15,8 +17,9 @@
   const MIN = 2;
   const MAX = 10;
 
-  const getRowCount = () => table.rows.length;
-  const getColCount = () => table.rows[0]?.cells.length ?? 0;
+  const getRowCount = () => container.rows.length;
+  const getColCount = () =>
+    container.rows[0] ? container.rows[0].cells.length : 0;
 
   const updateControls = () => {
     const rows = getRowCount();
@@ -50,18 +53,28 @@
   };
 
   const appendRow = () => {
-    if (getRowCount() < MAX) {
-      const cols = getColCount();
+    const rows = getRowCount();
 
-      (table.tBodies[0] || table).appendChild(createRow(cols));
+    if (rows >= MAX) {
+      return;
     }
+
+    const cols = getColCount();
+
+    container.appendChild(createRow(cols));
     updateControls();
   };
 
   const removeRow = () => {
-    if (getRowCount() > MIN) {
-      table.deleteRow(-1);
+    const rows = getRowCount();
+
+    if (rows <= MIN) {
+      return;
     }
+
+    const lastIndex = rows - 1;
+
+    container.deleteRow(lastIndex);
     updateControls();
   };
 
@@ -72,7 +85,7 @@
       return;
     }
 
-    Array.from(table.rows).forEach((row) => {
+    Array.from(container.rows).forEach((row) => {
       row.appendChild(document.createElement('td'));
     });
 
@@ -86,17 +99,30 @@
       return;
     }
 
-    Array.from(table.rows).forEach((row) => {
-      row.deleteCell(-1);
+    Array.from(container.rows).forEach((row) => {
+      const lastCellIndex = row.cells.length - 1;
+
+      row.deleteCell(lastCellIndex);
     });
 
     updateControls();
   };
 
-  btnAddRow?.addEventListener('click', appendRow);
-  btnRemRow?.addEventListener('click', removeRow);
-  btnAddCol?.addEventListener('click', appendColumn);
-  btnRemCol?.addEventListener('click', removeColumn);
+  if (btnAddRow) {
+    btnAddRow.addEventListener('click', appendRow);
+  }
+
+  if (btnRemRow) {
+    btnRemRow.addEventListener('click', removeRow);
+  }
+
+  if (btnAddCol) {
+    btnAddCol.addEventListener('click', appendColumn);
+  }
+
+  if (btnRemCol) {
+    btnRemCol.addEventListener('click', removeColumn);
+  }
 
   updateControls();
 })();
